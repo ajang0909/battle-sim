@@ -1,0 +1,353 @@
+/* Alexander Jang Student# 040806837
+ * CST 8284 Lab Section 020
+ * Professor: Rex Woollard
+ * Lab Instructor: Eric Torunski
+ * I am using the SingletonRandom and Input classes with permission from
+ * their creator Rex Woollard
+ * 
+ */
+package Actor;
+import javafx.animation.Animation;
+import javafx.animation.TranslateTransition;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableDoubleValue;
+import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Callback;
+import javafx.util.Duration;
+import javafx.util.converter.DoubleStringConverter;
+import army.Army;
+import util.SingletonRandom;
+import util.Input;
+/**
+ * The <i>Actor</i> class is the abstract superclass for the Hobbit, Elf, Orc and Wizard subclasses in this project. It contains the  <i>final static double</i> values representing the base boundary stats for <i>health, strength, and speed</i>. A string value for <i>name</i> is also stored in the <i>Actor</i> class. 
+ *
+ * @author Alexander Jang
+ *
+ */
+
+
+public abstract class Actor {
+	/**final static value used to represent the lower boundary of the <i>health</i> value */
+	public final static double MIN_HEALTH = 10.0; // static variables: one and only one instance shared by all objects
+	/** final static value used to represent the upper boundary of the <i>health</i> value*/
+	public final static double MAX_HEALTH = 200.0;
+	/**final static value used to represent the lower boundary of the <i>strength</i> value */
+	public final static double MIN_STRENGTH = 15.0;
+	/** final static value used to represent the upper boundary of the <i>strength</i> value*/
+	public final static double MAX_STRENGTH = 100.0;
+	/**final static value used to represent the lower boundary of the <i>speed</i> value */
+	public final static double MIN_SPEED = 1.0;
+	/** final static value used to represent the upper boundary of the <i>speed</i> value*/
+	public final static double MAX_SPEED = 100.0;
+	
+	SingletonRandom random = new SingletonRandom();
+	Input input = new Input();
+	/**static value used to with <i>name</i> value to help differentiate between objects.  */
+	public static int actorSerialNumber;
+	
+	/** used to store label or actual name of objects */
+	private SimpleStringProperty name = new SimpleStringProperty();
+	/** value used to determine amount of damage caused during <i>combatRound()</i>*/
+	private SimpleDoubleProperty strength = new SimpleDoubleProperty();
+	/** value not yet implemented to any function either than getter or setters */
+	private SimpleDoubleProperty speed = new SimpleDoubleProperty();
+	/** value used to determine the state of the object, if value falls to zero the actor is <i>slain</i>, used in <i>combatRound()</i> */
+	private SimpleDoubleProperty health = new SimpleDoubleProperty();
+	
+	private Army armyAllegiance;
+	
+	public boolean isHobbit;
+	
+	TranslateTransition tt;
+	
+	//CONSTRUCTION-ZONE: PLEASE WEAR HARD-HATS AT ALL TIME
+	/**Constructor of the <i>Actor</i> class used to randomly generate <i>double</i> values for <i>strength, speed, and health</i>. The <i>name</i> value will always return 'Actor' followed by the current <i>actorSerialNumber</i> which auto-increments at the end of every creation of an Actor */
+	public Actor()
+	{
+		actorSerialNumber++;
+		name.set("Actor"+ actorSerialNumber);
+		strength.set(random.getNormalDistribution(MIN_STRENGTH, MAX_STRENGTH, 1.5));
+		speed.set(random.getNormalDistribution(MIN_SPEED, MAX_SPEED, 1.5));
+		health.set(random.getNormalDistribution(MIN_HEALTH, MAX_HEALTH, 1.5));
+	}
+	
+	public Actor(Army armyAllegiance){
+		this();
+		this.armyAllegiance = armyAllegiance;
+	}
+	
+	//WHAT? RANDOMIZATION ISN'T GOOD ENOUGH FOR YOU? K FINE, HERE. PLAY GOD, SEE IF I CARE
+	/**virtual function that is called by subclasses to manually input values for  <i>name, strength, speed, and health</i>*/
+	public void inputAllFields()
+	{
+		name.set(input.getString("Enter a Name: "));
+		strength.set(this.setStrength(input.getDouble("Enter Stength: ")));
+		speed.set(this.setSpeed(input.getDouble("Enter Speed: ")));
+		health.set(this.setHealth(input.getDouble("Enter Health: ")));
+	}
+	
+	//set that mood right
+	/** setter for <i>health</i> value, also used to verify values fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setHealth(double health)
+	{
+		if (health < MIN_HEALTH)
+				health = MIN_HEALTH;
+		if (health > MAX_HEALTH)
+				health = MAX_HEALTH;
+		this.health.set(health);
+		return health;
+	}
+	
+	/** setter for <i>strength</i> value, also used to verify values fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setStrength(double strength)
+	{
+		if (strength < MIN_STRENGTH)
+				strength = MIN_STRENGTH;
+		if (strength > MAX_STRENGTH)
+				strength = MAX_STRENGTH;
+		this.strength.set(strength); 
+		return strength;
+	}
+	
+	/** setter for <i>speed</i> value, also used to verify values fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setSpeed(double speed)
+	{
+		if (speed < MIN_SPEED)
+				speed = MIN_SPEED;
+		if (speed > MAX_SPEED)
+				speed = MAX_SPEED;
+		this.speed.set(speed);
+		return speed;
+	}
+	
+	/** setter for <i>name</i> value */
+	public String setName(String name)
+	{
+		this.name.set(name);
+		return name;
+	}
+	
+	
+	//gotta get that paypah
+	/**returns a copy of the <i>double</i> value stored in <i>health</i> */
+	public double getHealth()
+	{
+		return health.get();
+	}
+	/**returns a copy of the <i>double</i> value stored in <i>strength</i> */
+	public double getStrength()
+	{
+		return strength.get();
+	}
+	/**returns a copy of the <i>double</i> value stored in <i>speed</i> */
+	public double getSpeed()
+	{
+		return speed.get();
+	}
+	/**returns a copy of the value stored in <i>name</i> */
+	public String getName()
+	{
+		return name.get();
+	}
+	
+	//I CHALLENGE YOU TO MORTAL COMBAT PREPARE YOURSELF SIR.
+	/**this function compares the <i>strength</i> and <i>health</i> values of two subclass objects of the <i>Actor</i> class. If at the end of the function one of the object's <i>health</i> values fall to 0, the function returns a <i>true boolean</i>, else a <i>false boolean</i> is returned.
+	 * 
+	 * The 'defending' object subtracts the 'attacking' objects strength from its <i>health</i>; the resulting value becoming the new <i>health</i> value for the 'defending' object. If the 'defending' object's <i>health</i> drops below or equals 0, the function ends and <i>true</i> is returned from the function.
+	 * 
+	 * If however, the 'defending' object's <i>health</i> value is above 0, the initial process is reversed and the 'attacking' object becomes the 'defending' one. Again if the 'defending' (previously 'attacking') object's <i>health</i> drops or equals 0, the function ends and <i>true</i> is returned. If the function ends without either <i>health</i> values dropping below or equalling 0, the function ends and returns a <i>false</i>.
+	 * */
+	public boolean combatRound(Actor defender)
+	{
+		defender.health.set(defender.health.get()- strength.get());
+		if (defender.health.get() <= 0)
+		{
+			System.out.println(name + " attacks ... "+ defender.name +"'s HP has fallen to 0...\n"  + defender.name + " has been slain.");
+			return true;
+		}
+		else
+		{
+			health.set(health.get() - defender.strength.get());
+			System.out.println(name + " attacks ... " + defender.name + " still stands with "+ defender.health +"HP remaining. \n" + defender.name + " attacks...");
+			if (health.get() <= 0)
+			{
+				System.out.println(name + "'s HP has fallen to 0...\n" + name + " has been slain...");
+				return true;
+			}
+			else
+			{
+				System.out.println(name + " withstands the attack with " + health +"HP remaining.");
+				return false;
+			}
+			}
+	}
+	
+
+	
+	//Gotta see that stuff y'know? I get that you get it, but c'mon I'm so lost..
+	/**returns a String value to present textual representation of a given object */
+	public String toString()
+	{
+		return String.format("Name: %s Strength: %.1f Health: %.1f Speed: %.1f", getName(), getStrength(), getHealth(), getSpeed());
+	}
+	
+	public abstract void createAvatar();
+	public abstract Node getAvatar();
+	public void updateActorAvatar(){
+			Tooltip.install(getAvatar(), new Tooltip(toString()));
+	}
+
+	public void startMoving() {
+		Army opposingArmy = armyAllegiance.getOpposingArmy();
+		Army allyArmy = opposingArmy.getOpposingArmy();
+		Actor opponent = opposingArmy.findNearestActor(this);
+		Actor ally = allyArmy.findNearestActor(this);
+		Point2D newLocation; //TODO
+		
+			if (isHobbit)
+				newLocation = calculateNewLocation(ally);
+			else
+				if (opponent.isVisible())
+				newLocation = calculateNewLocation(opponent);
+				else 
+				newLocation = calculateNewLocation(ally);
+		
+		System.out.printf("ToMove: %.1f , %.1f Opponent: %.1f , %.1f \n",
+				getAvatar().getTranslateX(), getAvatar().getTranslateY(),
+					opponent.getAvatar().getTranslateX(), opponent.getAvatar().getTranslateY());
+		
+		tt = new TranslateTransition(Duration.seconds(Math.random()*5.0+1.0), getAvatar());
+		//tt.setToX(Math.random()*getAvatar().getScene().getWidth()); tt.setToY(Math.random()*getAvatar().getScene().getHeight());
+		tt.setToX(newLocation.getX()); tt.setToY(newLocation.getY());
+		tt.setOnFinished(event->startMoving()); // NOT RECURSION!!!!
+		tt.play();	// TODO Auto-generated method stub
+	}
+
+	protected abstract Point2D calculateNewLocation(Actor opponent);
+
+	public void stopMoving() {
+		if (tt != null && tt.getStatus() == Animation.Status.RUNNING)
+				tt.pause();// TODO Auto-generated method stub
+	}
+	  //* createTable is static to allow Army to define a table without having any Actor objects present. */
+	  public static TableView<Actor> createTable() {
+	        TableView<Actor> table = new TableView<Actor>();
+	    final double PREF_WIDTH_DOUBLE = 50.0;
+	    table.setPrefWidth(PREF_WIDTH_DOUBLE*8.0);
+	        table.setEditable(true);
+	        TableColumn<Actor, String> nameCol            = new TableColumn<>("Name");            nameCol.setCellValueFactory     (new PropertyValueFactory<Actor, String>("name"));        nameCol.setPrefWidth(PREF_WIDTH_DOUBLE*2.0);
+	        TableColumn<Actor, Double> strengthCol    = new TableColumn<>("Strength");    strengthCol.setCellValueFactory (new PropertyValueFactory<Actor, Double>("strength"));  strengthCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+	        TableColumn<Actor, Double> speedCol            = new TableColumn<>("Speed");       speedCol.setCellValueFactory    (new PropertyValueFactory<Actor, Double>("speed"));     speedCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+	        TableColumn<Actor, Double> healthCol        = new TableColumn<>("Health");      healthCol.setCellValueFactory   (new PropertyValueFactory<Actor, Double>("health"));    healthCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+
+//	    // START CODE TEST: Following code attempted to implement generic syntax, but will NOT compile.
+//	    TableColumn<Actor, DoubleProperty> locationXCol = new TableColumn<Actor, DoubleProperty>("X");  locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//	    locationXCol.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableValue<Double>>() {
+//	      public ObservableValue<Double> call(CellDataFeatures<Actor, Double> actor) { return new ReadOnlyObjectWrapper<SimpleDoubleProperty>(actor.getValue().battlefieldAvatar.translateXProperty()); }});
+//	    locationXCol.setCellValueFactory(new Callback<CellDataFeatures<Actor, DoubleProperty>, ObservableValue<DoubleProperty>>() {
+//	      public ObservableValue<DoubleProperty> call(CellDataFeatures<Actor, DoubleProperty> actor) { return new ReadOnlyObjectWrapper<DoubleProperty>(actor.getValue().battlefieldAvatar.translateXProperty()); }});
+//	        // START CODE TEST: Following code is free of syntax errors, but does not bind dynamically.
+//	        TableColumn<Actor, Double> locationXCol = new TableColumn<Actor, Double>("X");  locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//	    locationXCol.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableValue<Double>>() {
+//	      public ObservableValue<Double> call(CellDataFeatures<Actor, Double> actor) { return new ReadOnlyObjectWrapper<Double>(actor.getValue().battlefieldAvatar.getTranslateX()); }});
+//	        TableColumn<Actor, Double> locationXCol        = new TableColumn<Actor, Double>("X");      locationXCol.setCellValueFactory   (new PropertyValueFactory<Actor, Double>("x")); locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//	        // END CODE TEST: Preceding code attempted to implement generic syntax, but will NOT compile.
+
+	        // START CODE TEST: Following code DOES WORK, but it is NOT generic.
+		TableColumn locationXCol = new TableColumn("X");
+		locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+		locationXCol
+				.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+					public ObservableDoubleValue call(
+							CellDataFeatures<Actor, Double> actor) {
+						return actor.getValue().getAvatar()
+								.translateXProperty();
+					}
+				});
+		TableColumn locationYCol = new TableColumn("Y");
+		locationYCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+		locationYCol
+				.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+					public ObservableDoubleValue call(
+							CellDataFeatures<Actor, Double> actor) {
+						return actor.getValue().getAvatar()
+								.translateYProperty();
+					}
+				});
+		// END CODE TEST: Following code DOES WORK, but it is NOT generic.
+
+		table.getColumns().addAll(nameCol, strengthCol, speedCol, healthCol,
+				locationXCol, locationYCol);
+		nameCol.setCellFactory(TextFieldTableCell.<Actor> forTableColumn());
+		nameCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, String>>() {
+			@Override
+			public void handle(CellEditEvent<Actor, String> t) {
+				Actor a = (t.getTableView().getItems().get(t.getTablePosition()
+						.getRow()));
+				a.setName(t.getNewValue());
+				a.updateActorAvatar();
+			}
+		}); // end setOnEditCommit()
+
+		strengthCol.setCellFactory(TextFieldTableCell
+				.<Actor, Double> forTableColumn(new DoubleStringConverter()));
+		strengthCol
+				.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>() {
+					@Override
+					public void handle(CellEditEvent<Actor, Double> t) {
+						Actor a = (t.getTableView().getItems().get(t
+								.getTablePosition().getRow()));
+						try {
+							a.setStrength(t.getNewValue());
+						} catch (IllegalArgumentException iae) {
+							// change to property was rejected, so old value
+							// remains unchanged, but the TableView says
+							// otherwise
+							Double d = t.getOldValue(); // No change to view,
+														// but it does retrieve
+														// the previous value.
+							System.out.println(d);
+						}
+					}
+				}); // end setOnEditCommit()
+
+		speedCol.setCellFactory(TextFieldTableCell
+				.<Actor, Double> forTableColumn(new DoubleStringConverter()));
+		speedCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>() {
+			@Override
+			public void handle(CellEditEvent<Actor, Double> t) {
+				Actor a = (t.getTableView().getItems().get(t.getTablePosition()
+						.getRow()));
+				a.setSpeed(t.getNewValue());
+				a.updateActorAvatar();
+			}
+		}); // end setOnEditCommit()
+
+		healthCol.setCellFactory(TextFieldTableCell
+				.<Actor, Double> forTableColumn(new DoubleStringConverter()));
+		healthCol
+				.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>() {
+					@Override
+					public void handle(CellEditEvent<Actor, Double> t) {
+						Actor a = (t.getTableView().getItems().get(t
+								.getTablePosition().getRow()));
+						a.setHealth(t.getNewValue());
+						a.updateActorAvatar();
+					}
+				}); // end setOnEditCommit()
+		return table;
+	} // end createTable()
+
+	public abstract boolean isVisible();
+}
