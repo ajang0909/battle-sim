@@ -1,0 +1,142 @@
+package army;
+
+import java.util.ArrayList;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
+import simulator.Simulator;
+import Actor.*;
+
+/**
+ * A collection of Actor objects. Uses the <i>ArrayList</i> array implementation. 
+ * @author Alexander Jang
+ *
+ */
+public class Army {
+
+/**<i>String</i> values used to label objects of the Army class */
+private String name;
+private Simulator simulator;
+private Color color;
+private DropShadow dropShadow;
+private ObservableList<Actor> collectionActors = FXCollections.observableList(new ArrayList<>());
+public ObservableList<Actor> getCollectionActors() {return FXCollections.unmodifiableObservableList(collectionActors); }
+private Army opposingArmy;
+
+
+/**constructor used to give specified access to the <i>name</i>variable for printing
+ * @param simulator TODO
+ * @param color TODO*/
+public Army(String name, Simulator simulator, Color color)
+{
+	this.name = name;
+	this.simulator = simulator;
+	this.color = color;
+	dropShadow = new DropShadow(20.0, color);
+}
+
+/**method used to fill the Army object with Actor objects */
+public void populate(ActorFactory.Type type, int numToAdd) 
+{
+	for (int i=0; i<numToAdd; ++i) 
+	{
+		Actor actor = type.create(this);
+		actor.createAvatar();
+		simulator.getChildren().add(actor.getAvatar());
+		Node avatar = actor.getAvatar();
+		double newX = simulator.getScene().getWidth()*Math.random();
+		double newY = simulator.getScene().getHeight()*Math.random();
+		avatar.setTranslateX(newX); avatar.setTranslateY(newY);
+		avatar.setEffect(dropShadow);
+		collectionActors.add(actor);
+		Tooltip.install(avatar, new Tooltip(actor.toString()));
+		// send "this" so that Actor object can capture its allegiance
+	} // end for
+} // end populate()
+
+/**function used to edit a specific Actor object within the Army, also returns the edited Actor object (currently only used for testing purposes) */
+public Actor edit(int indexOfActorToEdit)
+{
+	Actor a1 = collectionActors.get(indexOfActorToEdit);
+	a1.inputAllFields();
+	collectionActors.set(indexOfActorToEdit, a1);
+	return a1;
+}
+
+/**method used to display all object residing in the Army object, headlined with name of Army*/
+public void display()
+{
+	System.out.println(name);
+	for (Actor current: collectionActors)
+		System.out.println(current.toString());
+}
+
+/**function that returns the size of the Army object, as in the number of Actor objects residing inside*/
+public int size()
+{
+	return collectionActors.size();
+}
+
+public synchronized void startMoving() {
+	for (Actor actor : collectionActors)
+		actor.startMoving();
+}
+
+public synchronized void stopMoving() {
+	for (Actor actor : collectionActors)// TODO Auto-generated method stub
+			actor.stopMoving();
+	
+}
+
+
+public String getName() {
+	return name;
+}
+
+
+public Node getTableViewOfActors() {
+	TableView<Actor> tableView = Actor.createTable();
+	tableView.setItems(collectionActors);
+	return tableView;
+}
+
+public void setOpposingArmy(Army opposingArmy){
+	this.opposingArmy = opposingArmy;
+}
+
+public Army getOpposingArmy(){
+		return opposingArmy;
+	}
+
+public Actor findNearestActor(Actor actorToMove){
+	Actor nearest = null;
+	double distanceToClosest = Double.MAX_VALUE;
+	
+	for (Actor current : collectionActors){
+		if (current.isVisible()){
+		double xToMove = actorToMove.getAvatar().getTranslateX();
+		double yToMove = actorToMove.getAvatar().getTranslateY();
+		double xCurrent = current.getAvatar().getTranslateX();
+		double yCurrent = current.getAvatar().getTranslateY();
+		double deltaX = xToMove - xCurrent;
+		double deltaY = yToMove - yCurrent;
+		
+		double calculatedDistance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+		if (calculatedDistance < distanceToClosest){
+			distanceToClosest = calculatedDistance;
+			nearest = current;
+			}//end of if-calcDistance
+		}// end of if-isVisible
+	}//end of enhanced for-Loop
+	return nearest;
+}//end of findNearestActor
+
+}
+// more code in class Army
+// string s = actor.tostring()
+//assert(s contains("stealth,horse,agility,etc");
