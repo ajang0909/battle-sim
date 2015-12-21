@@ -1,0 +1,96 @@
+package Actor;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import army.Army;
+import util.SingletonRandom;
+import util.Input;
+
+/**<i>Hobbit</i> is a subclass of the <i>Actor</i> superclass; contains an additional <i>stealth</i> value to be implemented later on. 
+ * */
+public class Hobbit extends Actor
+{
+	
+	/**final static value used to represent the lower boundary of the <i>stealth</i> value */
+	public final static double MIN_STEALTH = 1.0; // static variables: one and only one instance shared by all objects
+	/**final static value used to represent the upper boundary of the <i>stealth</i> value */
+	public final static double MAX_STEALTH = 50.0;
+	
+	/**value not yet implemented */
+	private double stealth;
+	
+	
+	SingletonRandom random = new SingletonRandom();
+	Input input = new Input();
+	private Rectangle avatar;
+
+	/**constructor for <i>Hobbit</i> subclass; generates random <i>double</i> for <i>stealth</i> value within the upper and lower boundary values */
+	public Hobbit()
+	{
+		stealth = random.getNormalDistribution(MIN_STEALTH, MAX_STEALTH, 1.0);
+		isHobbit = true;
+	}
+	/** setter for <i>stealth</i> value, also used to verify values that fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setStealth(double stealth)
+	{
+		if (stealth < MIN_STEALTH)
+				stealth = MIN_STEALTH;
+		if (stealth > MAX_STEALTH)
+				stealth = MAX_STEALTH;
+		this.stealth = stealth;
+		return stealth;
+	}
+	/**returns a copy of the <i>double</i> value stored in <i>stealth</i> */
+	public double getStealth()
+	{
+		return stealth;
+	}
+	
+	public Hobbit(Army armyAllegience){
+		super(armyAllegience);
+		stealth= random.getNormalDistribution(MIN_STEALTH, MAX_STEALTH, 1.0);
+	}
+	
+	/**Overrides the <i>Actor</i> superclass' version of <i>inputAllFields()</i> function and adds a manual entry for <i>stealth</i> value*/
+	@Override 
+	public void inputAllFields()
+	{
+		System.out.println("Creating Hobbit: ");
+		super.inputAllFields();
+		stealth = this.setStealth(input.getDouble("Stealth: "));
+	}
+	/**Overrides the <i>Actor</i> superclass; version of <i>toString()</i> and prints textual representation with added <i>stealth</i> values unique to <i>Hobbit</i> subclass*/
+	@Override
+	public String toString()
+	{
+		return String.format ("%s Stealth: %.1f", super.toString(), stealth);
+	}
+	@Override
+	public Node getAvatar() {
+		return avatar;
+	}
+	@Override
+	public void createAvatar() {
+		avatar = new Rectangle(12.0, 8.0, Color.RED);
+		avatar.setStrokeWidth(2.0);
+	}
+	@Override
+	protected Point2D calculateNewLocation(Actor ally) {
+		Point2D placeHolder1 = new Point2D((ally.getAvatar().getTranslateX()), (ally.getAvatar().getTranslateY()));// TODO Auto-generated method stub
+		Point2D currentLocation = new Point2D((this.getAvatar().getTranslateX()), (this.getAvatar().getTranslateY()));
+		Point2D placeHolder2 = placeHolder1.midpoint(currentLocation);
+		placeHolder1 = placeHolder2.midpoint(currentLocation);
+		
+		return (placeHolder1);
+	}
+
+	@Override
+	public boolean isVisible() {
+		double visibilityFactor = this.stealth + random.getNormalDistribution(MIN_STEALTH, MAX_STEALTH, 1.0);
+		if (visibilityFactor>MAX_STEALTH)
+			return false;
+		else
+			return true;
+	}
+}
