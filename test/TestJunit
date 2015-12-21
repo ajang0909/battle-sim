@@ -1,0 +1,270 @@
+package Test;
+
+import static org.junit.Assert.*;
+import javafx.scene.paint.Color;
+
+import org.junit.Test;
+
+import army.Army;
+import util.Input;
+import Actor.*;
+
+/**jUnit testing class used for test cases; testing successful implementation of various subclasses and methods as well as the use of a Factory class */
+public class TestJunit {
+
+	/**creates a user-defined size array filled with <i>Hobbit and Wizard</i> subclass objects, with a 20% chance of creating <i>Wizard</i> subclasses */
+	@Test
+	public void testArmy()
+	{
+		System.out.println("\nTest Army Hobbit/Wizards: ");
+		Input input = new Input();
+		int size = input.getInt("Enter your army size: ");
+		Actor[] army = new Actor[size];
+		for (int i = 0 ; i<(size) ; i++)
+		{
+			if(Math.random()<0.2)
+			{
+				army[i] = new Wizard();
+				System.out.println(army[i].toString());
+			}
+			else
+			{
+				army[i] = new Hobbit();
+				System.out.println(army[i].toString());
+			}
+		}
+	}//end of testArmy()
+	
+	/** tests <i>combatRoung()</i> with two user-define subclass objects; 1 <i>Hobbit</i> and 1 <i>Wizard</i>. The function is looped until one of the subclass' <i>health</i> value drops to or below 0 */
+	@Test
+	public void testActorSkirmishes() 
+	{
+		System.out.println("\nTest ActorSkirmishes: ");
+		Actor a1 = new Hobbit();
+		Actor a2 = new Wizard();
+		boolean end;
+
+	
+		a1.inputAllFields();
+		System.out.println("");
+		a2.inputAllFields();
+		System.out.println("");
+		
+		double a1healthcheck = a1.getHealth();
+		double a2healthcheck = a2.getHealth();
+	
+		//Loops the combatRound until one of the object's health field falls to 0 or below
+		//Resets health to 0 if falls below 0
+		do
+		{
+			a1healthcheck = a1.getHealth();
+			a2healthcheck = a2.getHealth();
+			end = a1.combatRound(a2);
+			assertTrue((a1.getHealth()<a1healthcheck) || (a1.getHealth() == 0));
+			assertTrue(a2.getHealth()<a2healthcheck || (a2.getHealth() == 0));
+		}while(end == false);
+	}//end of testActorSkirmishes
+	
+	/**testing creation array of randomly generated objects of subclass <i>Hobbit</i>, prints list of objects, prompts user to edit an entry and re-prints list with edited entry visible */
+	@Test	
+	public void testArrayHobbit()
+	{
+		System.out.println("\nTest Array Hobbits: ");
+		Input input = new Input();
+		int size = input.getInt("Enter your army size: ");
+		int choice = size + 1;
+		Actor[] actor = new Actor[size];
+		for (int i = 0 ; i<(size) ; i++)
+		{
+			actor[i] = new Hobbit();
+			System.out.println(actor[i].toString());
+		}
+		
+	do{
+		choice = input.getInt("\nWhich actor would you like to edit? ");
+		if (choice > size || choice <= 0)
+			System.out.println("Invalid entry.");
+	} while(choice>size || choice <= 0);
+	
+		actor[choice-1].inputAllFields();
+		System.out.println("");
+		for (int i = 0 ; i<(size) ; i++)
+			System.out.println(actor[i].toString());
+	}//end of testArrayHobbit
+	
+	/**testing creation array of randomly generated objects of subclass <i>Wizard</i>, prints list of objects, prompts user to edit an entry and re-prints list with edited entry visible */
+	@Test	
+	public void testArrayWizard()
+	{
+		System.out.println("\nTest Array Wizards: ");
+		Input input = new Input();
+		int size = input.getInt("Enter your army size: ");
+		int choice = size + 1;
+		Actor[] actor = new Actor[size];
+		for (int i = 0 ; i<(size) ; i++)
+		{
+			actor[i] = new Wizard();
+			System.out.println(actor[i].toString());
+		}
+		
+	do{
+		choice = input.getInt("\nWhich actor would you like to edit? ");
+		if (choice > size || choice <= 0)
+			System.out.println("Invalid entry.");
+	} while(choice>size || choice <= 0);
+	
+		actor[choice-1].inputAllFields();
+		System.out.println("");
+		for (int i = 0 ; i<(size) ; i++)
+			System.out.println(actor[i].toString());
+	}//end of testArrayHobbit
+	
+	/**tests the creation of subclass objects (<i>Hobbits and Wizards</i>), ensures user-defined entries above and below upper and lower boundaries are snapped to their respective values */
+	@Test
+	public void testIndependentActors()
+	{
+			System.out.println("\nTest Independent Actors: ");
+			Actor a1 = new Hobbit();
+			Actor a2 = new Wizard();
+			
+			//Implicit Calls of toString()
+			System.out.println(a1);
+			System.out.println(a2);
+			
+			//Explicit calls toString()
+			System.out.println(a2.toString());
+			System.out.println(a1.toString()+"\n");	
+			
+			
+			//Setter Test: Testing setters work and set default values for inappropriate inputs, and returns correct input
+			/*The output for this part should always be:
+			 * Name: Actor Strength: 100.0 Health: 10.0 Speed: 35.0 Stealth: 5.0
+			 */
+			System.out.println("Setter Test: ");
+			a1.setHealth(-20);
+			assertTrue(a1.getHealth()==10.0);
+			
+			a1.setStrength(99999);
+			assertTrue(a1.getStrength()==100.0);
+			
+			a1.setSpeed(35);
+			assertTrue(a1.getSpeed()==35);
+			
+			((Hobbit) a1).setStealth(-124);
+			assertTrue(((Hobbit) a1).getStealth()==5.0);
+			
+			System.out.println(a1.toString()+"\n");
+			
+			
+			//Tests input all fields
+			System.out.println("Input all fields Test: ");
+			a2.inputAllFields();
+			System.out.println(a2.toString());
+		
+	}// end of testIndependent Actors
+	
+	/**testing the creation, population and proper display of the army object, orc and elf subclasses */
+	@Test
+	public void phase1()
+	{
+		Army forcesOfLight = new Army("Forces of Light",  null, Color.RED);
+		Army forcesOfDarkness = new Army("Forces of Darkness",  null, Color.RED);
+		forcesOfLight.populate(ActorFactory.Type.ELF, 10);
+		forcesOfDarkness.populate(ActorFactory.Type.ORC, 10);
+		forcesOfLight.display();
+		forcesOfDarkness.display();
+	}
+	
+	/**test to ensure constructor inheritance of subclasses are valid */
+	@Test
+	public void phase2()
+	{
+		Actor a1 = new Elf();
+		assertTrue(((Elf) a1).getAgility()>=10.0 && (((Elf) a1).getAgility()<=70.0)); //assert that randomized values for new instance variables
+		assertTrue(((Elf) a1).getDexterity()>=15.0 && (((Elf) a1).getAgility()<=100.0)); //fall inbetween the values specified in their MAX/MIN final static counterparts
+		System.out.println(a1.toString());
+		Actor a2 = new Orc();
+		assertTrue(((Orc) a2).getIntimidation()>=10.0 && (((Orc) a2).getIntimidation()<=65.0));
+		assertTrue(((Orc) a2).getOdour()>=5.0 && (((Orc) a2).getOdour()<=30.0));
+		System.out.println(a2.toString());
+		Actor a3 = new Wizard();
+		System.out.println(a3.toString());
+
+	}
+	
+	
+	/**testing the implementation of two army objects containing new subclasses, asserting values get snapped to their lower and upper values when input is outside of bounds */
+	@Test
+	public void phase3()
+	{
+		Input input = new Input();
+		Actor a1 = new Elf();
+		Actor a2 = new Orc();
+		
+		Army forcesOfLight = new Army("Forces of Light", null, Color.RED);
+		forcesOfLight.populate(ActorFactory.Type.HOBBIT, 4);
+		forcesOfLight.populate(ActorFactory.Type.ELF, 3);
+		forcesOfLight.populate(ActorFactory.Type.WIZARD, 2);
+		forcesOfLight.display(); // display after automatic generation with random values
+		System.out.println("Choose 4, 5 or 6 for Elf, and enter the following values for proper j-unit testing: ");
+		System.out.println("Strength: 50\tSpeed: 50\tHealth: 50\tAgility: 9999\tDexterity: 0");
+		int indexToEdit = input.getInt("Forces of Light", 0, forcesOfLight.size()-1);
+		
+		a1 = forcesOfLight.edit(indexToEdit);
+		assertTrue(((Elf) a1).getAgility()==70.0); 
+		assertTrue(((Elf) a1).getDexterity()==15.0);
+		forcesOfLight.display(); // display after editing a selected Actor object
+		
+		
+		Army forcesOfDark = new Army("Forces of Darkness",  null, Color.RED);
+		forcesOfDark.populate(ActorFactory.Type.ORC, 3);
+		forcesOfDark.populate(ActorFactory.Type.RANDOM, 5);
+		forcesOfDark.display();
+		System.out.println("\nChoose 0, 1 or 2 for Elf, and enter the following values for proper j-unit testing: ");
+		System.out.println("Strength: 50\tSpeed: 50\tHealth: 50\t Intimidation: 0\t Odour: 9999");
+		indexToEdit = input.getInt("Forces of Darkness", 0, forcesOfDark.size()-1);
+		a2 = forcesOfDark.edit(indexToEdit);
+		
+		assertTrue(((Orc) a2).getIntimidation()==10.0);
+		assertTrue(((Orc) a2).getOdour()==30.0);
+		forcesOfDark.display();
+	}
+	
+	/**testing the implementation of two army objects containing new subclasses, asserting values entered within the upper and lower boundaries are accepted */
+	@Test
+	public void phase3A()
+	{
+		Input input = new Input();
+		Actor a1 = new Elf();
+		Actor a2 = new Orc();
+		
+		Army forcesOfLight = new Army("Forces of Light",  null, Color.RED);
+		forcesOfLight.populate(ActorFactory.Type.HOBBIT, 4);
+		forcesOfLight.populate(ActorFactory.Type.ELF, 3);
+		forcesOfLight.populate(ActorFactory.Type.WIZARD, 2);
+		forcesOfLight.display(); // display after automatic generation with random values
+		System.out.println("\nChoose 4, 5 or 6 for Elf, and enter the following values for proper j-unit testing: ");
+		System.out.println("Strength: 50\tSpeed: 50\tHealth: 50\tAgility: 35\tDexterity: 40");
+		int indexToEdit = input.getInt("Forces of Light", 0, forcesOfLight.size()-1);
+		
+		a1 = forcesOfLight.edit(indexToEdit);
+		assertTrue(((Elf) a1).getAgility()==35.0); 
+		assertTrue(((Elf) a1).getDexterity()==40.0);
+		forcesOfLight.display(); // display after editing a selected Actor object
+		
+		
+		Army forcesOfDark = new Army("Forces of Darkness",  null, Color.RED);
+		forcesOfDark.populate(ActorFactory.Type.ORC, 3);
+		forcesOfDark.populate(ActorFactory.Type.RANDOM, 5);
+		forcesOfDark.display();
+		System.out.println("Choose 0, 1 or 2 for Elf, and enter the following values for proper j-unit testing: ");
+		System.out.println("Strength: 50\tSpeed: 50\tHealth: 50\t Intimidation: 25\t Odour: 20");
+		indexToEdit = input.getInt("Forces of Darkness", 0, forcesOfDark.size()-1);
+		a2 = forcesOfDark.edit(indexToEdit);
+		
+		assertTrue(((Orc) a2).getIntimidation()==25.0);
+		assertTrue(((Orc) a2).getOdour()==20.0);
+		forcesOfDark.display();
+	}
+	
+}//end of TestJunit
