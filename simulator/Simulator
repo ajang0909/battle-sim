@@ -1,0 +1,97 @@
+package simulator;
+
+import Actor.Actor;
+import Actor.ActorFactory;
+import army.Army;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
+public class Simulator extends Group {
+	private Stage primaryStage;
+	private Army forcesOfLight;
+	private Army forcesOfDarkness;
+	private Stage stageListControllerWindow;
+	private Stage stageTableControllerWindow;
+	
+	public Simulator(Stage primaryStage)
+	{
+		this.primaryStage = primaryStage;
+		forcesOfLight = new Army("Forces of Light", this, Color.BLUE);
+		forcesOfDarkness = new Army("Forces of Darkness", this, Color.RED);
+		forcesOfLight.setOpposingArmy(forcesOfDarkness);
+		forcesOfDarkness.setOpposingArmy(forcesOfLight);
+		buildListViewWindow();
+		buildTableViewWindow();
+	}
+
+	public void populate() {
+		forcesOfLight.populate(ActorFactory.Type.HOBBIT, 4);
+		forcesOfLight.populate(ActorFactory.Type.ELF, 8);
+		forcesOfLight.populate(ActorFactory.Type.WIZARD, 5);
+		
+		forcesOfDarkness.populate(ActorFactory.Type.WIZARD, 6);
+		forcesOfDarkness.populate(ActorFactory.Type.ORC, 14);
+	}
+
+	public void run() {
+		forcesOfLight.startMoving();
+		forcesOfDarkness.startMoving();
+	}
+
+	public void suspend() {
+		forcesOfLight.stopMoving();// TODO Auto-generated method stub
+		forcesOfDarkness.stopMoving();
+	}
+
+	public void openListViewWindow() {
+		stageListControllerWindow.show();	// TODO Auto-generated method stub
+
+	}
+
+	public void closeListViewWindow() {
+		// TODO Auto-generated method stub
+		
+	}
+	private final void buildListViewWindow() { // final because of its use in the constructor
+	    VBox vBoxLightArmy = new VBox(5.0, new Text(forcesOfLight.getName()), new ListView<Actor>(forcesOfLight.getCollectionActors()));
+	    VBox vBoxDarkArmy = new VBox(5.0, new Text(forcesOfDarkness.getName()), new ListView<Actor>(forcesOfDarkness.getCollectionActors()));
+	    HBox hBoxSceneGraphRoot = new HBox(5.0, vBoxLightArmy, vBoxDarkArmy);
+
+	    if (stageListControllerWindow != null) {
+	      stageListControllerWindow.close();
+	      stageListControllerWindow.setScene(null);
+	    }
+	    stageListControllerWindow = new Stage(StageStyle.UTILITY);
+	    stageListControllerWindow.initOwner(primaryStage);
+	    stageListControllerWindow.setScene(new Scene(hBoxSceneGraphRoot));
+	  } // end buildListViewWindow()
+	
+	public final void buildTableViewWindow() { // final because of its use in the constructor
+			    VBox vBoxLightArmy = new VBox(5.0, new Text(forcesOfLight.getName()), forcesOfLight.getTableViewOfActors());
+			    VBox vBoxDarkArmy = new VBox(5.0, new Text(forcesOfDarkness.getName()), forcesOfDarkness.getTableViewOfActors());
+			    HBox hBoxSceneGraphRoot = new HBox(5.0, vBoxLightArmy, vBoxDarkArmy);
+
+			    if (stageTableControllerWindow != null) {
+			      stageTableControllerWindow.close();
+			      stageTableControllerWindow.setScene(null);
+			    }
+			    stageTableControllerWindow = new Stage(StageStyle.UTILITY);
+			    stageTableControllerWindow.initOwner(primaryStage);
+			    stageTableControllerWindow.setScene(new Scene(hBoxSceneGraphRoot));
+	} // end buildTableViewWindow()
+
+	public void openTableViewWindow(){
+		stageTableControllerWindow.show();
+	}
+	public void closeTableViewWindow()
+	{
+		stageTableControllerWindow.hide();
+	}
+}
