@@ -1,0 +1,124 @@
+package Actor;
+
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import army.Army;
+import util.Input;
+import util.SingletonRandom;
+
+
+/**<i>Orc</i> is a subclass of the <i>Actor</i> superclass; contains additional instance variables <i>intimidation</i>, and <i>odour</i>  value to be implemented later on. 
+ **/
+public class Orc extends Actor 
+{
+	/**final static value used to represent the lower boundary of the <i>intimidation</i> value */
+	public final static double MIN_INTIMIDATION = 10.0;
+	/**final static value used to represent the upper boundary of the <i>intimidation</i> value */
+	public final static double MAX_INTIMIDATION = 65.0;
+	/**final static value used to represent the lower boundary of the <i>odour</i> value */
+	public final static double MIN_ODOUR = 5.0;
+	/**final static value used to represent the upper boundary of the <i>odour</i> value */
+	public final static double MAX_ODOUR = 30.0;
+	
+	/**value not yet implemented */
+	private double intimidation;
+	/**value not yet implemented */
+	private double odour;
+	
+	SingletonRandom random = new SingletonRandom();
+	Input input = new Input();
+	private Rectangle avatar;
+	
+	/**constructor for <i>Orc</i> subclass; includes randomized <i> intimidation and odour</i> double values */
+	public Orc()
+	{
+		intimidation = random.getNormalDistribution(MIN_INTIMIDATION, MAX_INTIMIDATION, 1.0);
+		odour = random.getNormalDistribution(MIN_ODOUR, MAX_ODOUR, 1.0);
+		isHobbit = false;
+	}
+	
+	public Orc(Army armyAllegience){
+		super(armyAllegience);
+		intimidation= random.getNormalDistribution(MIN_INTIMIDATION, MAX_INTIMIDATION, 1.0);
+		odour = random.getNormalDistribution(MIN_ODOUR, MAX_ODOUR, 1.0);
+	}
+	
+	/** setter for <i>intimidation</i> value, also used to verify values that fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setIntimidation(double intimidation)
+	{
+		if (intimidation < MIN_INTIMIDATION)
+				intimidation = MIN_INTIMIDATION;
+		if (intimidation > MAX_INTIMIDATION)
+				intimidation = MAX_INTIMIDATION;
+		this.intimidation = intimidation;
+		return intimidation;
+	}
+	
+	/** setter for <i>odour</i> value, also used to verify values that fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setOdour(double odour)
+	{
+		if (odour < MIN_ODOUR)
+				odour = MIN_ODOUR;
+		if (odour > MAX_ODOUR)
+				odour = MAX_ODOUR;
+		this.odour = odour;
+		return odour;
+	}
+	
+	/**returns a copy of the <i>double</i> value stored in <i>intimidation</i> */
+	public double getIntimidation()
+	{
+		return intimidation;
+	}
+	
+	/**returns a copy of the <i>double</i> value stored in <i>odour</i> */
+	public double getOdour()
+	{
+		return odour;
+	}
+	
+	
+	/**Overrides the <i>Actor</i> superclass' version of <i>inputAllFields()</i> function and adds a manual entry for <i>intimidation and odour</i> values*/
+	@Override 
+	public void inputAllFields()
+	{
+		System.out.println("Creating Orc: ");
+		super.inputAllFields();
+		intimidation = this.setIntimidation(input.getDouble("Intimidation: "));
+		odour = this.setOdour(input.getDouble("Odour: "));
+	}
+	
+	/**Overrides the <i>Actor</i> superclass; version of <i>toString()</i> and prints textual representation with added <i>intimidation and odour</i> values unique to <i>Orc</i> subclass*/
+	@Override
+	public String toString()
+	{
+		return String.format ("%s Intimidation: %.1f Odour: %.1f", super.toString(), intimidation, odour);
+	}
+
+	@Override
+	public Node getAvatar() {
+		return avatar;
+	}
+
+	@Override
+	public void createAvatar() {
+		avatar = new Rectangle(12.0, 8.0, Color.GREEN);
+		avatar.setStrokeWidth(2.0);
+	}
+
+	@Override
+	protected Point2D calculateNewLocation(Actor opponent) {
+		Point2D opponentLocation = new Point2D((opponent.getAvatar().getTranslateX()), (opponent.getAvatar().getTranslateY()));// TODO Auto-generated method stub
+		Point2D currentLocation = new Point2D((this.getAvatar().getTranslateX()), (this.getAvatar().getTranslateY()));
+		Point2D newLocation = opponentLocation.midpoint(currentLocation);
+		
+		return (newLocation);
+	}
+
+	@Override
+	public boolean isVisible() {
+		return true;
+	}
+}
