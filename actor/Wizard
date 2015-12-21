@@ -1,0 +1,115 @@
+package Actor;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import army.Army;
+import util.Input;
+/**<i>Wizard</i> is a subclass of the <i>Actor</i> superclass; contains an additional <i>hasStaff and hasHorse</i> booleans to be implemented later on. 
+ * */
+public class Wizard extends Actor 
+{
+	/**boolean not yet implemented */
+	private boolean hasStaff;
+	/**boolean not yet implemented */
+	private boolean hasHorse;
+	/** integer value used to help processing a decision from user during <i>inputAllFields</i> override function */
+	private int decision;
+	
+	Input input = new Input();
+	private Rectangle avatar;
+	
+	/**constructor for <i>Wizard</i> subclass; includes randomized <i> hasStaff and hasHorse</i> booleans */
+	public Wizard()
+	{
+		if(Math.random()>0.5)
+			hasStaff = true;
+		else
+			hasStaff = false;
+		if(Math.random()>0.5)
+			hasHorse = true;
+		else
+			hasHorse = false;
+		
+		isHobbit = false;
+	}
+	
+	public Wizard(Army armyAllegiance){
+		super(armyAllegiance);
+		
+		if(Math.random()>0.5)
+			hasStaff = true;
+		else
+			hasStaff = false;
+		if(Math.random()>0.5)
+			hasHorse = true;
+		else
+			hasHorse = false;
+	}
+	
+	/**Overrides the <i>Actor</i> superclass' version of <i>inputAllFields()</i> function with added prompts to determine booleans for <i>hasStaff and hasHorse</i>*/
+	@Override 
+	public void inputAllFields()
+	{
+		System.out.println("Creating Wizard: ");
+		super.inputAllFields();
+		System.out.println("Does this wizard have a staff?");
+		do
+		{
+			decision = input.getInt("Enter 1 for yes or 2 for no: ");
+			if (decision == 1)
+				hasStaff=true;
+			else if (decision ==2)
+				hasStaff=false;
+			else
+				System.out.println("Invalid Entry.");
+		}while ((decision != 1) && (decision !=2));
+		
+		System.out.println("Does this wizard have a horse?");
+		do
+		{
+			decision = input.getInt("Enter 1 for yes or 2 for no: ");
+			if (decision == 1)
+				hasHorse=true;
+			else if (decision ==2)
+				hasHorse=false;
+			else
+				System.out.println("Invalid Entry.");
+		}while ((decision != 1) && (decision !=2));
+	}
+	
+	/**Overrides the <i>Actor</i> superclass; version of <i>toString()</i> and prints textual representation with added <i>hasStaff and hasHorse</i> booleans unique to <i>Wizard</i> subclass*/
+	@Override
+	public String toString()
+	{
+		return String.format ("%s Has Staff: %s Has Horse: %s", super.toString(), hasStaff, hasHorse );
+	}
+
+	@Override
+	public Node getAvatar() {
+		return avatar;
+	}
+
+	@Override
+	public void createAvatar() {
+		avatar = new Rectangle(12.0, 8.0, Color.PURPLE);
+		avatar.setStrokeWidth(2.0);
+	}
+
+	@Override
+	protected Point2D calculateNewLocation(Actor opponent) {
+		Point2D opponentLocation = new Point2D((opponent.getAvatar().getTranslateX()), (opponent.getAvatar().getTranslateY()));// TODO Auto-generated method stub
+		Point2D currentLocation = new Point2D((this.getAvatar().getTranslateX()), (this.getAvatar().getTranslateY()));
+		Point2D newLocation = opponentLocation.midpoint(currentLocation);
+		
+		return (newLocation);
+	}
+
+	@Override
+	public boolean isVisible() {
+		if (hasStaff)
+			return false;
+		else
+			return true;
+	}
+}
