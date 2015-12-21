@@ -1,0 +1,128 @@
+package Actor;
+
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import army.Army;
+import util.Input;
+import util.SingletonRandom;
+
+/**<i>Elf</i> is a subclass of the <i>Actor</i> superclass; contains additional instance variables <i>agility</i>, and <i>dexterity</i>  value to be implemented later on. 
+ **/
+public class Elf extends Actor 
+{
+	/**final static value used to represent the lower boundary of the <i>agility</i> value */
+	public final static double MIN_AGILITY = 10.0;
+	/**final static value used to represent the upper boundary of the <i>agility</i> value */
+	public final static double MAX_AGILITY = 70.0;
+	/**final static value used to represent the lower boundary of the <i>dexterity</i> value */
+	public final static double MIN_DEXTERITY = 15.0;
+	/**final static value used to represent the upper boundary of the <i>dexterity</i> value */
+	public final static double MAX_DEXTERITY = 100.0;
+	
+	/**value not yet implemented */
+	private double agility;
+	/**value not yet implemented */
+	private double dexterity;
+	
+	SingletonRandom random = new SingletonRandom();
+	Input input = new Input();
+	
+	private Rectangle avatar;
+	
+	/**constructor for <i>Elf</i> subclass; includes randomized <i> agility and dexterity</i> double values */
+	public Elf()
+	{
+		agility = random.getNormalDistribution(MIN_AGILITY, MAX_AGILITY, 1.0);
+		dexterity = random.getNormalDistribution(MIN_DEXTERITY, MAX_DEXTERITY, 1.0);
+		isHobbit = false;
+	}
+	
+	public Elf(Army armyAllegience){
+		super(armyAllegience);
+		agility= random.getNormalDistribution(MIN_AGILITY, MAX_AGILITY, 1.0);
+		dexterity = random.getNormalDistribution(MIN_DEXTERITY, MAX_DEXTERITY, 1.0);
+	}
+	
+	/** setter for <i>agility</i> value, also used to verify values that fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setAgility(double agility)
+	{
+		if (agility < MIN_AGILITY)
+				agility = MIN_AGILITY;
+		if (agility > MAX_AGILITY)
+				agility = MAX_AGILITY;
+		this.agility = agility;
+		return agility;
+	}
+	
+	
+	/** setter for <i>dexterity</i> value, also used to verify values that fall between upper and lower boundaries; if not they are snapped to upper or lower boundary */
+	public double setDexterity(double dexterity)
+	{
+		if (dexterity < MIN_DEXTERITY)
+				dexterity = MIN_DEXTERITY;
+		if (dexterity > MAX_DEXTERITY)
+				dexterity = MAX_DEXTERITY;
+		this.dexterity = dexterity;
+		return dexterity;
+	}
+	
+	/**returns a copy of the <i>double</i> value stored in <i>agility</i> */
+	public double getAgility()
+	{
+		return agility;
+	}
+	
+	/**returns a copy of the <i>double</i> value stored in <i>dexterity</i> */
+	public double getDexterity()
+	{
+		return dexterity;
+	}
+	
+	
+	/**Overrides the <i>Actor</i> superclass' version of <i>inputAllFields()</i> function and adds a manual entry for <i>agility and dexterity</i> values*/
+	@Override 
+	public void inputAllFields()
+	{
+		System.out.println("Creating Elf: ");
+		super.inputAllFields();
+		agility = this.setAgility(input.getDouble("Agility: "));
+		dexterity = this.setDexterity(input.getDouble("Dexterity: "));
+	}
+	
+	/**Overrides the <i>Actor</i> superclass; version of <i>toString()</i> and prints textual representation with added <i>agility and dexterity</i> values unique to <i>Elf</i> subclass*/
+	@Override
+	public String toString()
+	{
+		return String.format ("%s Agility: %.1f	Dexterity: %.1f", super.toString(), agility, dexterity);
+	}
+
+	@Override
+	public Node getAvatar() {
+		return avatar;
+	}
+
+	@Override
+	public void createAvatar() {
+		avatar = new Rectangle(12.0, 8.0, Color.AQUAMARINE);
+		avatar.setStrokeWidth(2.0);
+	}
+
+	@Override
+	protected Point2D calculateNewLocation(Actor opponent) {
+		Point2D opponentLocation = new Point2D((opponent.getAvatar().getTranslateX()), (opponent.getAvatar().getTranslateY()));// TODO Auto-generated method stub
+		Point2D currentLocation = new Point2D((this.getAvatar().getTranslateX()), (this.getAvatar().getTranslateY()));
+		Point2D newLocation = opponentLocation.midpoint(currentLocation);
+		
+		return (newLocation);
+	}
+
+	@Override
+	public boolean isVisible() {
+		if (agility>dexterity)
+			return false;
+		else
+			return true;
+	}
+}
